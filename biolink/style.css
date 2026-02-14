@@ -1,11 +1,15 @@
 /*
 Theme Name: One Bio
+Theme URI: https://infor1.com.br
 Author: INFOR1 - Rodrigo Cruz
-Description: Tema para página Institucional do Condomínio Colina de Piatã - Etapa 2A.
-Version: 1.1
+Author URI: https://infor1.com.br
+Description: Tema institucional focado em centralização de links e serviços (Estilo Bio), projetado com design Glassmorphism responsivo.
+Version: 1.3
+License: GNU General Public License v2 or later
+Text Domain: onebio
 */
 
-/* --- 1. VARIÁVEIS E TEMAS GLASS --- */
+/* --- 1. VARIÁVEIS DE SISTEMA E ESQUEMAS GLASSMORPHISM --- */
 :root {
     --glass-surface: rgba(255, 255, 255, 0.65);
     --glass-border: rgba(255, 255, 255, 0.4);
@@ -18,14 +22,14 @@ Version: 1.1
     --transition-speed: 0.3s;
 }
 
-/* Temas Padrão */
+/* Esquemas de Cores Nativos */
 body.theme-light { --bg-gradient: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); --glass-surface: rgba(255, 255, 255, 0.7); --icon-default: #333; }
 body.theme-dark { --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); --glass-surface: rgba(30, 41, 59, 0.7); --glass-border: rgba(255, 255, 255, 0.1); --text-main: #f8fafc; --text-sub: #cbd5e1; --icon-default: #f8fafc; --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); }
 body.theme-blue { --bg-gradient: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%); --glass-surface: rgba(255, 255, 255, 0.85); --text-main: #0c4a6e; --text-sub: #075985; --icon-default: #0284c7; }
 body.theme-green { --bg-gradient: linear-gradient(45deg, #11998e 0%, #38ef7d 100%); --glass-surface: rgba(255, 255, 255, 0.85); --text-main: #064e3b; --text-sub: #065f46; --icon-default: #059669; }
 body.theme-lilac { --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --glass-surface: rgba(255, 255, 255, 0.25); --glass-border: rgba(255, 255, 255, 0.5); --text-main: #ffffff; --text-sub: #e9d5ff; --icon-default: #ffffff; }
 
-/* --- 2. LAYOUT GERAL --- */
+/* --- 2. LAYOUT GERAL E RESETS --- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html { width: 100%; overflow-x: hidden; }
 body {
@@ -45,7 +49,9 @@ body {
     transition: max-width 0.4s ease;
 }
 
-/* --- 3. COMPONENTES (BASE / MOBILE FIRST) --- */
+/* --- 3. ESTRUTURA DOS COMPONENTES (MOBILE FIRST) --- */
+
+/* Cabeçalho de Perfil */
 .profile-header { width: 100%; text-align: center; margin-bottom: 30px; position: relative; z-index: 2; }
 .glass-card {
     background: var(--glass-surface);
@@ -66,6 +72,7 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1); color: var(--text-main); cursor: pointer;
 }
 
+/* Tipografia de Perfil processada via WP Editor */
 .profile-name { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
 .profile-name p, .profile-name h1, .profile-name h2, .profile-name h3 { margin: 0; padding: 0; font-size: inherit; font-weight: inherit; }
 
@@ -74,10 +81,10 @@ body {
 .profile-bio p:last-child { margin-bottom: 0; }
 .btn-vcard { display: inline-flex; align-items: center; gap: 8px; background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(var(--blur)); color: var(--text-main); padding: 10px 24px; border-radius: 50px; font-size: 0.9rem; font-weight: 600; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
-/* Grid Mobile Padrão */
+/* Wrapper Principal dos Links (Mobile) */
 .links-wrapper { width: 100%; display: flex; flex-direction: column; gap: 16px; z-index: 2; }
 
-/* CARTÃO (LINK) */
+/* Estrutura Base do Cartão de Link */
 .link-card {
     display: flex; align-items: center;
     text-decoration: none; color: var(--text-main);
@@ -97,37 +104,42 @@ body {
 .link-title { flex-grow: 1; font-weight: 600; font-size: 1rem; }
 .link-chevron { opacity: 0.6; font-size: 14px; }
 
-/* ESTILOS DE BLOQUEIO */
+/* Indicadores de Bloqueio (Requer Login) */
 .locked-card { opacity: 0.9; border: 1px dashed rgba(100, 100, 100, 0.5) !important; background: rgba(200, 200, 200, 0.5) !important; }
 .locked-padlock { margin-left: 10px; color: #666; font-size: 14px; }
 
-/* OUTROS */
+/* Blocos de Conteúdo Integrado (Breakout Iframe/HTML) */
 .content-breakout { width: 100%; margin: 20px 0; overflow: hidden; z-index: 10; box-shadow: 0 15px 40px rgba(0,0,0,0.15); background: rgba(255,255,255,0.05); position: relative; border-radius: 20px; }
 .content-breakout iframe { width: 100% !important; display: block; border: none; }
 .content-breakout img, .content-breakout video { width: 100% !important; height: auto; display: block; border: none; }
 
+/* Modais de Sistema (Login e Pix) */
 .modal-backdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(15px); z-index: 9999; justify-content: center; align-items: center; }
 .modal-backdrop.visible { display: flex; animation: fadeIn 0.3s forwards; }
 .modal-window { background: #ffffff; color: #1f2937; width: 90%; max-width: 360px; padding: 30px 24px; border-radius: 28px; text-align: center; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; align-items: center; }
 .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* Estilização Interna de Funcionalidades Financeiras */
 #qr-container { width: 100%; margin: 20px 0; min-height: 200px; display: flex !important; flex-direction: column; justify-content: center !important; align-items: center !important; background-color: #fff; text-align: center; }
 #qr-container img { margin: 0 auto !important; display: block !important; max-width: 100% !important; }
-
 .input-money { width: 100%; padding: 16px; font-size: 1.2rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 16px; margin-bottom: 16px; font-weight: 700; color: #0f172a; outline: none; background: #f8fafc; }
 .btn-primary { width: 100%; padding: 16px; background: linear-gradient(135deg, #32bcad 0%, #209688 100%); color: white; border: none; border-radius: 16px; font-weight: 700; font-size: 1rem; cursor: pointer; }
 .code-copy-box { width: 100%; background: #f1f5f9; padding: 14px; border-radius: 12px; font-family: monospace; font-size: 0.85rem; color: #334155; word-break: break-all; border: 1px dashed #cbd5e1; margin-bottom: 24px; margin-top: 20px; max-height: 80px; overflow-y: auto; text-align: center; }
+
+/* Feedback Visual (Toasts) */
 .toast-msg { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); color: #fff; padding: 12px 24px; border-radius: 50px; font-weight: 600; opacity: 0; pointer-events: none; z-index: 10000; transition: opacity 0.3s; }
 .toast-msg.show { opacity: 1; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* Informações da Sessão do Usuário */
 .user-welcome { margin-top: 15px; background: var(--glass-surface); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 50px; display: inline-flex; align-items: center; gap: 15px; font-size: 0.9rem; color: var(--text-main); }
 .btn-logout { background: transparent; border: none; color: #ef4444; font-weight: 600; cursor: pointer; font-size: 0.85rem; padding: 0; }
 
-/* --- 4. RESPONSIVIDADE & GRID (Telas Grandes >= 1366px) --- */
-/* Esta seção deve vir DEPOIS para sobrescrever o .links-wrapper mobile */
+/* --- 4. RESPONSIVIDADE E GRID (Telas >= 1366px) --- */
 @media (min-width: 1366px) {
     :root {
-        --app-max-width: 850px; /* Mantém os botões num tamanho responsivo agradável */
+        /* Largura otimizada para acomodar o grid de 3 colunas sem distorção */
+        --app-max-width: 850px; 
     }
 
     .links-wrapper {
@@ -138,13 +150,14 @@ body {
         justify-content: center;
     }
 
+    /* Modifica o formato padrão do card para quadrado em telas grandes */
     .link-card {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         text-align: center;
-        aspect-ratio: 1 / 1; /* Força os cards a serem quadrados */
+        aspect-ratio: 1 / 1; 
         height: auto; 
         padding: 24px !important;
         width: 100%; 
@@ -153,7 +166,7 @@ body {
     .icon-box {
         margin-right: 0 !important;
         margin-bottom: 16px;
-        font-size: 42px !important; /* Ícone ajustado para proporção quadrada */
+        font-size: 42px !important; 
         width: auto !important; height: auto !important;
     }
 
@@ -166,7 +179,7 @@ body {
     .link-chevron { display: none; } 
     .locked-padlock { margin-left: 0 !important; margin-top: 10px; display: block; }
 
-    /* Breakout para iframes continua ocupando a linha inteira */
+    /* Força o breakout de conteúdo HTML a ocupar toda a largura da linha no grid */
     .content-breakout {
         grid-column: 1 / -1; 
         border-radius: 20px !important;

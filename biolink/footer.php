@@ -1,6 +1,7 @@
 </div> <div id="pixModal" class="modal-backdrop">
    <div class="modal-window">
         <div class="modal-close" onclick="closePixModal()">&times;</div>
+        
         <div id="view-input" style="display:none; width:100%;">
             <i class="fa-brands fa-pix" style="font-size:40px; color:#32bcad; margin-bottom:15px;"></i>
             <h3>Qual o valor?</h3>
@@ -8,6 +9,7 @@
             <input type="text" id="pixValue" class="input-money" placeholder="0,00" inputmode="decimal">
             <button class="btn-primary" onclick="generateDynamicPix()">Gerar QR Code</button>
         </div>
+        
         <div id="view-result" style="display:none; width:100%;">
             <i class="fa-brands fa-pix" style="font-size:40px; color:#32bcad; margin-bottom:15px;"></i>
             <h3 id="resultTitle">Pagamento Pix</h3>
@@ -45,12 +47,16 @@
 <?php wp_footer(); ?>
 
 <script>
+/**
+ * Gerencia responsividade dinâmica de blocos de conteúdo HTML/Iframe.
+ * Força extensões para preenchimento de colunas no grid desktop.
+ */
 function forceBreakoutLayout() {
     const blocks = document.querySelectorAll('.content-breakout');
-    if(blocks.length === 0) return;
+    if (blocks.length === 0) return;
     const viewportWidth = window.innerWidth;
     
-    if(viewportWidth > 1366) {
+    if (viewportWidth > 1366) {
         blocks.forEach(el => {
             el.style.width = '100%';
             el.style.marginLeft = '0';
@@ -79,7 +85,9 @@ window.addEventListener('load', forceBreakoutLayout);
 window.addEventListener('resize', forceBreakoutLayout);
 setTimeout(forceBreakoutLayout, 500);
 
-// --- LÓGICA DE LOGIN ---
+/**
+ * Funções de Controle de Interface de Modais (Login)
+ */
 function openLoginModal() {
     document.getElementById('loginModal').style.display = 'flex';
     setTimeout(() => document.getElementById('loginModal').classList.add('visible'), 10);
@@ -89,14 +97,17 @@ function closeLoginModal() {
     setTimeout(() => document.getElementById('loginModal').style.display = 'none', 300);
 }
 
+/**
+ * Autenticação via API Rest/Ajax interna do WP.
+ */
 function processLogin() {
     const email = document.getElementById('userEmail').value;
     const pass = document.getElementById('userPass').value;
     const btn = document.getElementById('btnLoginAction');
     const msg = document.getElementById('loginMsg');
 
-    if(!email.includes('@')) { msg.innerText = "Digite um e-mail válido."; return; }
-    if(!pass) { msg.innerText = "Digite sua senha."; return; }
+    if (!email.includes('@')) { msg.innerText = "Digite um e-mail válido."; return; }
+    if (!pass) { msg.innerText = "Digite sua senha."; return; }
 
     btn.innerText = "Verificando...";
     btn.disabled = true;
@@ -114,7 +125,7 @@ function processLogin() {
     })
     .then(response => response.json())
     .then(data => {
-        if(data.success) {
+        if (data.success) {
             msg.style.color = "green";
             msg.innerText = "Sucesso! Recarregando...";
             setTimeout(() => location.reload(), 1000);
@@ -133,14 +144,16 @@ function processLogin() {
 }
 
 function doLogout() {
-    if(!confirm("Deseja sair da sua área privada?")) return;
+    if (!confirm("Deseja encerrar a sua sessão?")) return;
     const formData = new FormData();
     formData.append('action', 'mybiolink_logout');
     fetch(mybiolink_vars.ajax_url, { method: 'POST', body: formData })
     .then(() => location.reload());
 }
 
-// --- FUNÇÕES DE PIX ---
+/**
+ * Motor de Geração PIX BRCODE E QR Code Dinâmico
+ */
 let currentPixKey = '';
 const modal = document.getElementById('pixModal');
 const viewInput = document.getElementById('view-input');
@@ -156,8 +169,8 @@ function openPixStatic(key, imgUrl) {
     copyBox.innerText = key;
     qrBox.innerHTML = '';
     
-    if(imgUrl && imgUrl.length > 5) {
-        qrBox.innerHTML = '<img src="'+imgUrl+'" style="max-width:100%; border-radius:10px;">';
+    if (imgUrl && imgUrl.length > 5) {
+        qrBox.innerHTML = '<img src="' + imgUrl + '" style="max-width:100%; border-radius:10px;">';
     } else {
         qrBox.style.display = 'none';
     }
@@ -175,7 +188,7 @@ function openPixDynamic(key) {
 function generateDynamicPix() {
     let rawVal = document.getElementById('pixValue').value;
     let val = 0;
-    if(rawVal) val = rawVal.replace(',', '.');
+    if (rawVal) val = rawVal.replace(',', '.');
     
     const payload = createPixPayload(currentPixKey, val);
     
@@ -193,7 +206,7 @@ function generateDynamicPix() {
 
     setTimeout(() => {
         const imgs = qrBox.getElementsByTagName('img');
-        if(imgs.length > 0) { imgs[0].style.margin = "0 auto"; imgs[0].style.display = "block"; }
+        if (imgs.length > 0) { imgs[0].style.margin = "0 auto"; imgs[0].style.display = "block"; }
     }, 50);
 }
 
@@ -209,6 +222,7 @@ function resetModal() {
     viewInput.style.display = 'none';
     viewResult.style.display = 'none';
 }
+
 function copyPixCode() {
     navigator.clipboard.writeText(copyBox.innerText).then(() => {
         const t = document.getElementById('toast');
@@ -216,25 +230,39 @@ function copyPixCode() {
         setTimeout(() => t.classList.remove('show'), 3000);
     });
 }
+
 function shareProfile() {
-    if(navigator.share) navigator.share({title:document.title, url:window.location.href});
-    else { navigator.clipboard.writeText(window.location.href); alert('Link copiado!'); }
+    if (navigator.share) {
+        navigator.share({title:document.title, url:window.location.href});
+    } else { 
+        navigator.clipboard.writeText(window.location.href); 
+        alert('Link copiado para a área de transferência!'); 
+    }
 }
+
+// Máscara monetária em tempo real
 document.getElementById('pixValue').addEventListener('input', function(e) {
     let v = e.target.value.replace(/\D/g, "");
     v = (v/100).toFixed(2) + "";
     v = v.replace(".", ",").replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,").replace(/(\d)(\d{3}),/g, "$1.$2,");
     e.target.value = v == "0,00" ? "" : v;
 });
+
+// Algoritmo de geração do Payload BR Code PIX
 function createPixPayload(key, value) {
     const f = (id, v) => id + v.length.toString().padStart(2,'0') + v;
     let p = f('00','01') + f('26', f('00','br.gov.bcb.pix') + f('01',key)) + f('52','0000') + f('53','986');
     if (parseFloat(value) > 0) p += f('54', parseFloat(value).toFixed(2));
     p += f('58','BR') + f('59','RECEBEDOR') + f('60','CIDADE') + f('62', f('05','***')) + '6304';
+    
+    // Cálculo de CRC16 exigido pelo Banco Central
     let crc = 0xFFFF;
-    for(let c=0; c<p.length; c++) {
+    for (let c=0; c<p.length; c++) {
         crc ^= p.charCodeAt(c) << 8;
-        for(let i=0; i<8; i++) { if(crc & 0x8000) crc = (crc << 1) ^ 0x1021; else crc = crc << 1; }
+        for (let i=0; i<8; i++) { 
+            if (crc & 0x8000) crc = (crc << 1) ^ 0x1021; 
+            else crc = crc << 1; 
+        }
     }
     return p + (crc & 0xFFFF).toString(16).toUpperCase().padStart(4,'0');
 }
