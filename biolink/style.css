@@ -1,8 +1,8 @@
 /*
-Theme Name: MyBioLink V14 (Height Fix)
+Theme Name: MyBioLink V19 (Grid 3 Col Fixed + Color Reset)
 Author: Rodrigo
-Description: Remove travas de altura do iframe para respeitar o código HTML.
-Version: 14.0
+Description: Grid Desktop com 3 colunas estritas e reset de cores ao mudar tema.
+Version: 19.0
 */
 
 /* --- 1. VARIÁVEIS E TEMAS GLASS --- */
@@ -14,37 +14,88 @@ Version: 14.0
     --text-main: #1f2937;
     --text-sub: #4b5563;
     --icon-default: #111;
-    --accent: #333;
+    --app-max-width: 480px;
+    --transition-speed: 0.3s;
 }
 
-/* Temas */
+/* Temas Padrão */
 body.theme-light { --bg-gradient: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); --glass-surface: rgba(255, 255, 255, 0.7); --icon-default: #333; }
-body.theme-dark { --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); --glass-surface: rgba(30, 41, 59, 0.7); --glass-border: rgba(255, 255, 255, 0.1); --text-main: #f8fafc; --text-sub: #cbd5e1; --icon-default: #f8fafc; --accent: #fff; --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); }
-body.theme-blue { --bg-gradient: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%); --glass-surface: rgba(255, 255, 255, 0.85); --text-main: #0c4a6e; --text-sub: #075985; --icon-default: #0284c7; --accent: #0284c7; }
-body.theme-green { --bg-gradient: linear-gradient(45deg, #11998e 0%, #38ef7d 100%); --glass-surface: rgba(255, 255, 255, 0.85); --text-main: #064e3b; --text-sub: #065f46; --icon-default: #059669; --accent: #059669; }
-body.theme-lilac { --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --glass-surface: rgba(255, 255, 255, 0.25); --glass-border: rgba(255, 255, 255, 0.5); --text-main: #ffffff; --text-sub: #e9d5ff; --icon-default: #ffffff; --accent: #ffffff; }
+body.theme-dark { --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); --glass-surface: rgba(30, 41, 59, 0.7); --glass-border: rgba(255, 255, 255, 0.1); --text-main: #f8fafc; --text-sub: #cbd5e1; --icon-default: #f8fafc; --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); }
+body.theme-blue { --bg-gradient: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%); --glass-surface: rgba(255, 255, 255, 0.85); --text-main: #0c4a6e; --text-sub: #075985; --icon-default: #0284c7; }
+body.theme-green { --bg-gradient: linear-gradient(45deg, #11998e 0%, #38ef7d 100%); --glass-surface: rgba(255, 255, 255, 0.85); --text-main: #064e3b; --text-sub: #065f46; --icon-default: #059669; }
+body.theme-lilac { --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); --glass-surface: rgba(255, 255, 255, 0.25); --glass-border: rgba(255, 255, 255, 0.5); --text-main: #ffffff; --text-sub: #e9d5ff; --icon-default: #ffffff; }
 
-/* --- 2. LAYOUT SEGURO --- */
+/* --- 2. LAYOUT GERAL --- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
 html { width: 100%; overflow-x: hidden; }
-
 body {
     width: 100%; min-height: 100vh; overflow-x: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--text-main);
-    background: var(--bg-gradient); background-attachment: fixed; background-size: cover;
+    background: var(--bg-gradient); background-attachment: fixed; background-size: cover; background-position: center;
     display: flex; justify-content: center;
 }
-
 .app-container {
-    width: 100%; max-width: 480px; min-height: 100vh;
+    width: 100%; 
+    max-width: var(--app-max-width); 
+    min-height: 100vh;
     padding: 60px 24px 100px;
     display: flex; flex-direction: column; align-items: center;
     position: relative; overflow: visible !important; 
+    transition: max-width 0.4s ease;
 }
 
-/* --- 3. COMPONENTES --- */
+/* --- 3. RESPONSIVIDADE & GRID (3 Colunas Fixas) --- */
+@media (min-width: 768px) {
+    :root {
+        --app-max-width: 1100px; /* Garante largura suficiente para 3 colunas */
+    }
+
+    .links-wrapper {
+        display: grid;
+        /* minmax(0, 1fr) evita que conteúdo grande quebre o grid */
+        grid-template-columns: repeat(3, minmax(0, 1fr)); 
+        gap: 24px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .link-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 180px; /* Altura fixa para uniformidade */
+        padding: 20px !important;
+        width: 100%; /* Ocupa 100% da célula do grid */
+    }
+
+    .icon-box {
+        margin-right: 0 !important;
+        margin-bottom: 12px;
+        font-size: 36px !important;
+        width: 60px !important; height: 60px !important;
+    }
+
+    .link-title {
+        flex-grow: 0 !important;
+        font-size: 1.1rem;
+    }
+
+    .link-chevron { display: none; } 
+    .locked-padlock { margin-left: 0 !important; margin-top: 10px; }
+
+    /* Breakout para iframes continua ocupando a linha inteira */
+    .content-breakout {
+        grid-column: 1 / -1; 
+        border-radius: 20px !important;
+        width: 100% !important;
+        margin-left: 0 !important; margin-right: 0 !important;
+    }
+}
+
+/* --- 4. COMPONENTES --- */
 .profile-header { width: 100%; text-align: center; margin-bottom: 30px; position: relative; z-index: 2; }
 .avatar-container { position: relative; width: 110px; height: 110px; margin: 0 auto 16px; }
 .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
@@ -59,156 +110,57 @@ body {
 
 .profile-name { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
 .profile-bio { font-size: 0.95rem; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5; font-weight: 500; }
-
-.btn-vcard {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--glass-surface); border: 1px solid var(--glass-border);
-    backdrop-filter: blur(var(--blur)); color: var(--text-main);
-    padding: 10px 24px; border-radius: 50px; font-size: 0.9rem; font-weight: 600; text-decoration: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
+.btn-vcard { display: inline-flex; align-items: center; gap: 8px; background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(var(--blur)); color: var(--text-main); padding: 10px 24px; border-radius: 50px; font-size: 0.9rem; font-weight: 600; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
 .links-wrapper { width: 100%; display: flex; flex-direction: column; gap: 16px; z-index: 2; }
 
+/* CARTÃO (LINK) */
 .link-card {
     display: flex; align-items: center;
-    background: var(--glass-surface); padding: 18px 20px; border-radius: 20px;
     text-decoration: none; color: var(--text-main);
-    border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow);
-    backdrop-filter: blur(var(--blur)); transition: transform 0.2s;
+    border: 1px solid var(--glass-border); 
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--blur)); 
+    transition: transform 0.2s, background 0.3s;
     width: 100%; box-sizing: border-box;
+    padding: 18px 20px; border-radius: 20px;
+    background: rgba(var(--card-rgb, 255, 255, 255), 0.45); 
+    cursor: pointer;
 }
 .link-card:active { transform: scale(0.98); }
+.link-card:hover { background: rgba(var(--card-rgb, 255, 255, 255), 0.65); }
 
-.icon-box {
-    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-    font-size: 24px; margin-right: 16px; flex-shrink: 0; color: var(--icon-default);
-}
+.icon-box { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 16px; flex-shrink: 0; color: var(--icon-default); }
 .link-title { flex-grow: 1; font-weight: 600; font-size: 1rem; }
 .link-chevron { opacity: 0.6; font-size: 14px; }
 
-/* --- 4. SHORTCODES (CORREÇÃO DE ALTURA) --- */
-.content-breakout {
-    width: 100%;
-    margin: 20px 0;
-    overflow: hidden;
-    z-index: 10;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-    background: rgba(255,255,255,0.05);
-    position: relative;
-    border-radius: 20px;
+/* ESTILOS DE BLOQUEIO */
+.locked-card {
+    opacity: 0.9;
+    border: 1px dashed rgba(100, 100, 100, 0.5) !important;
+    background: rgba(200, 200, 200, 0.2) !important;
 }
+.locked-padlock { margin-left: 10px; color: #666; font-size: 14px; }
 
-/* IFRAME: Respeita a altura do HTML */
-.content-breakout iframe {
-    width: 100% !important;
-    /* SEM height definida aqui, para respeitar o height="500" do HTML */
-    display: block;
-    border: none;
-}
+/* --- 5. OUTROS (Breakout, Modal) --- */
+.content-breakout { width: 100%; margin: 20px 0; overflow: hidden; z-index: 10; box-shadow: 0 15px 40px rgba(0,0,0,0.15); background: rgba(255,255,255,0.05); position: relative; border-radius: 20px; }
+.content-breakout iframe { width: 100% !important; display: block; border: none; }
+.content-breakout img, .content-breakout video { width: 100% !important; height: auto; display: block; border: none; }
 
-/* IMAGENS/VÍDEO: Mantém proporção automática */
-.content-breakout img, 
-.content-breakout video {
-    width: 100% !important;
-    height: auto;
-    display: block;
-    border: none;
-}
-
-/* --- 5. MODAL PIX & QR CODE --- */
-.modal-backdrop {
-    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0,0,0,0.6); backdrop-filter: blur(15px); z-index: 9999;
-    justify-content: center; align-items: center;
-}
+.modal-backdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(15px); z-index: 9999; justify-content: center; align-items: center; }
 .modal-backdrop.visible { display: flex; animation: fadeIn 0.3s forwards; }
-
-.modal-window {
-    background: #ffffff; color: #1f2937;
-    width: 90%; max-width: 360px;
-    padding: 30px 24px; border-radius: 28px;
-    text-align: center; position: relative;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    display: flex; flex-direction: column; align-items: center; 
-}
-
-#qr-container {
-    width: 100%; margin: 20px 0; min-height: 200px;
-    display: flex !important; flex-direction: column;
-    justify-content: center !important; align-items: center !important;
-    background-color: #fff; text-align: center;
-}
+.modal-window { background: #ffffff; color: #1f2937; width: 90%; max-width: 360px; padding: 30px 24px; border-radius: 28px; text-align: center; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; align-items: center; }
+.modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+#qr-container { width: 100%; margin: 20px 0; min-height: 200px; display: flex !important; flex-direction: column; justify-content: center !important; align-items: center !important; background-color: #fff; text-align: center; }
 #qr-container img { margin: 0 auto !important; display: block !important; max-width: 100% !important; }
 
-.input-money {
-    width: 100%; padding: 16px; font-size: 1.5rem; text-align: center;
-    border: 2px solid #e2e8f0; border-radius: 16px; margin-bottom: 24px;
-    font-weight: 800; color: #0f172a; outline: none; background: #f8fafc;
-}
+.input-money { width: 100%; padding: 16px; font-size: 1.2rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 16px; margin-bottom: 16px; font-weight: 700; color: #0f172a; outline: none; background: #f8fafc; }
 
-.btn-primary {
-    width: 100%; padding: 16px;
-    background: linear-gradient(135deg, #32bcad 0%, #209688 100%);
-    color: white; border: none; border-radius: 16px;
-    font-weight: 700; font-size: 1rem; cursor: pointer;
-}
-
-.code-copy-box {
-    width: 100%; background: #f1f5f9; padding: 14px; border-radius: 12px;
-    font-family: monospace; font-size: 0.85rem; color: #334155;
-    word-break: break-all; border: 1px dashed #cbd5e1;
-    margin-bottom: 24px; margin-top: 20px; max-height: 80px; overflow-y: auto; text-align: center;
-}
-
-.modal-close {
-    position: absolute; top: 16px; right: 16px;
-    width: 32px; height: 32px; border-radius: 50%;
-    background: #f1f5f9; color: #64748b;
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-}
-
-.toast-msg {
-    position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-    background: rgba(15, 23, 42, 0.9); color: #fff;
-    padding: 12px 24px; border-radius: 50px; font-weight: 600;
-    opacity: 0; pointer-events: none; z-index: 10000; transition: opacity 0.3s;
-}
+.btn-primary { width: 100%; padding: 16px; background: linear-gradient(135deg, #32bcad 0%, #209688 100%); color: white; border: none; border-radius: 16px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+.code-copy-box { width: 100%; background: #f1f5f9; padding: 14px; border-radius: 12px; font-family: monospace; font-size: 0.85rem; color: #334155; word-break: break-all; border: 1px dashed #cbd5e1; margin-bottom: 24px; margin-top: 20px; max-height: 80px; overflow-y: auto; text-align: center; }
+.toast-msg { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); color: #fff; padding: 12px 24px; border-radius: 50px; font-weight: 600; opacity: 0; pointer-events: none; z-index: 10000; transition: opacity 0.3s; }
 .toast-msg.show { opacity: 1; }
-
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-
-/* ESTILOS DE LOGIN E WELCOME */
-.user-welcome {
-    margin-top: 15px;
-    background: var(--glass-surface);
-    border: 1px solid var(--glass-border);
-    padding: 8px 16px;
-    border-radius: 50px;
-    display: inline-flex;
-    align-items: center;
-    gap: 15px;
-    font-size: 0.9rem;
-    color: var(--text-main);
-}
-.btn-logout {
-    background: transparent;
-    border: none;
-    color: #ef4444; /* Vermelho */
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 0.85rem;
-    padding: 0;
-}
-
-/* CARTÃO BLOQUEADO */
-.locked-card {
-    border-style: dashed !important;
-    border-color: #999 !important;
-    opacity: 0.9;
-    cursor: pointer;
-}
-.locked-card:hover {
-    background: rgba(0,0,0,0.05);
-}
+.user-welcome { margin-top: 15px; background: var(--glass-surface); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 50px; display: inline-flex; align-items: center; gap: 15px; font-size: 0.9rem; color: var(--text-main); }
+.btn-logout { background: transparent; border: none; color: #ef4444; font-weight: 600; cursor: pointer; font-size: 0.85rem; padding: 0; }

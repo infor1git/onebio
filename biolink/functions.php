@@ -9,45 +9,65 @@ add_action('after_setup_theme', 'mybiolink_setup');
 
 // === SCRIPTS & AJAX ===
 function mybiolink_scripts() {
-    wp_enqueue_style('mybiolink-style', get_stylesheet_uri(), array(), '15.0.0');
+    // Increment version to clear cache
+    wp_enqueue_style('mybiolink-style', get_stylesheet_uri(), array(), '19.0.0');
     wp_enqueue_style('fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
     wp_enqueue_script('qrcodejs', 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', array(), '1.0', true);
     
-    // Disponibiliza URL do Ajax para o JS
     wp_localize_script('qrcodejs', 'mybiolink_vars', array(
         'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce'    => wp_create_nonce('email_login_nonce')
+        'nonce'    => wp_create_nonce('login_nonce')
     ));
 }
 add_action('wp_enqueue_scripts', 'mybiolink_scripts');
 
-// === AJAX: LOGIN VIA E-MAIL (SEM SENHA) ===
-function mybiolink_email_login() {
-    check_ajax_referer('email_login_nonce', 'nonce');
+// === HELPER: HEX TO RGB ===
+function mybiolink_hex2rgb($hex) {
+    $hex = str_replace("#", "", $hex);
+    if(strlen($hex) == 3) {
+        $r = hexdec(substr($hex,0,1).substr($hex,0,1));
+        $g = hexdec(substr($hex,1,1).substr($hex,1,1));
+        $b = hexdec(substr($hex,2,1).substr($hex,2,1));
+    } else {
+        $r = hexdec(substr($hex,0,2));
+        $g = hexdec(substr($hex,2,2));
+        $b = hexdec(substr($hex,4,2));
+    }
+    return "$r, $g, $b";
+}
+
+// === AJAX: LOGIN COMPLETO ===
+function mybiolink_process_login() {
+    check_ajax_referer('login_nonce', 'nonce');
 
     $email = sanitize_email($_POST['email']);
-    
-    if (!is_email($email)) {
-        wp_send_json_error('E-mail inválido.');
-    }
+    $password = $_POST['password'];
+
+    if (!is_email($email)) wp_send_json_error('E-mail inválido.');
+    if (empty($password)) wp_send_json_error('Digite a senha.');
 
     $user = get_user_by('email', $email);
 
     if (!$user) {
-        wp_send_json_error('E-mail não encontrado no sistema.');
+        wp_send_json_error('E-mail não encontrado.');
     }
 
-    // Login Programático Seguro
-    wp_set_current_user($user->ID);
-    wp_set_auth_cookie($user->ID);
-    
-    // Dispara gancho de login (opcional, bom para plugins)
-    do_action('wp_login', $user->user_login, $user);
+    $creds = array(
+        'user_login'    => $user->user_login, 
+        'user_password' => $password,
+        'remember'      => true
+    );
 
-    wp_send_json_success('Logado com sucesso!');
+    $signon = wp_signon($creds, false);
+
+    if (is_wp_error($signon)) {
+        wp_send_json_error('Senha incorreta.');
+    }
+
+    wp_send_json_success('Login realizado com sucesso!');
 }
-add_action('wp_ajax_nopriv_mybiolink_email_login', 'mybiolink_email_login');
-add_action('wp_ajax_mybiolink_email_login', 'mybiolink_email_login');
+add_action('wp_ajax_nopriv_mybiolink_process_login', 'mybiolink_process_login');
+add_action('wp_ajax_mybiolink_process_login', 'mybiolink_process_login');
 
 // === AJAX: LOGOUT ===
 function mybiolink_logout() {
@@ -57,12 +77,12 @@ function mybiolink_logout() {
 add_action('wp_ajax_mybiolink_logout', 'mybiolink_logout');
 
 
-// === CUSTOMIZER (CORES) ===
+// === CUSTOMIZER & RESET DE CORES (MODO DEFINITIVO) ===
 function mybiolink_customize_register($wp_customize) {
     $wp_customize->add_section('mybiolink_design', array('title' => 'Aparência do Tema', 'priority' => 30));
     $wp_customize->add_setting('theme_color_scheme', array('default' => 'theme-light', 'transport' => 'refresh'));
     $wp_customize->add_control('theme_color_scheme', array(
-        'label' => 'Escolha o Tema',
+        'label' => 'Paleta de Cores Base',
         'section' => 'mybiolink_design',
         'type' => 'select',
         'choices' => array(
@@ -72,21 +92,77 @@ function mybiolink_customize_register($wp_customize) {
             'theme-green' => 'Forest Green',
             'theme-lilac' => 'Lilac Glass',
         ),
+        'description' => 'Atenção: Ao alterar e publicar uma nova paleta, todas as cores individuais dos botões serão apagadas para seguir o novo padrão.',
     ));
+
+    $wp_customize->add_setting('custom_bg_image', array('default' => '', 'transport' => 'refresh'));
+    $wp_customize->add_control(new WP_Customize_Image_Control($wp_customize, 'custom_bg_image', array(
+        'label'    => 'Imagem de Fundo (Background)',
+        'section'  => 'mybiolink_design',
+    )));
 }
 add_action('customize_register', 'mybiolink_customize_register');
+
+// --- AÇÃO: RESETAR CORES NO BANCO DE DADOS ---
+function mybiolink_reset_colors_on_theme_change($option_name, $old_value, $new_value) {
+    // Garante que é a opção certa e que houve mudança
+    if ($option_name === 'theme_color_scheme' && $old_value !== $new_value) {
+        global $wpdb;
+        // Executa limpeza direta no banco para máxima eficiência
+        $wpdb->query("DELETE FROM $wpdb->postmeta WHERE meta_key = '_link_color'");
+    }
+}
+// 'updated_theme_mod' dispara quando uma opção de tema é salva com sucesso
+add_action('updated_theme_mod', 'mybiolink_reset_colors_on_theme_change', 10, 3);
+
 
 // === CPT & METABOXES ===
 function create_link_cpt() {
     register_post_type('biolink', array(
-        'labels' => array('name' => 'Meus Links / Conteúdo', 'singular_name' => 'Item', 'add_new_item' => 'Adicionar Novo'),
+        'labels' => array('name' => 'Meus Links / Conteúdo', 'singular_name' => 'Item', 'add_new_item' => 'Adicionar Novo', 'all_items' => 'Todos os Links'),
         'public' => true,
         'menu_icon' => 'dashicons-admin-links',
         'supports' => array('title', 'page-attributes'),
+        'show_in_menu' => true,
     ));
 }
 add_action('init', 'create_link_cpt');
 
+// --- COLUNAS NO ADMIN ---
+function add_biolink_columns($columns) {
+    $new_columns = array();
+    foreach($columns as $key => $title) {
+        if ($key == 'date') $new_columns['menu_order'] = 'Ordem';
+        $new_columns[$key] = $title;
+    }
+    return $new_columns;
+}
+add_filter('manage_biolink_posts_columns', 'add_biolink_columns');
+
+function show_biolink_custom_column($column, $post_id) {
+    if ($column === 'menu_order') {
+        $post = get_post($post_id);
+        echo '<strong>' . $post->menu_order . '</strong>';
+    }
+}
+add_action('manage_biolink_posts_custom_column', 'show_biolink_custom_column', 10, 2);
+
+function make_biolink_column_sortable($columns) {
+    $columns['menu_order'] = 'menu_order';
+    return $columns;
+}
+add_filter('manage_edit-biolink_sortable_columns', 'make_biolink_column_sortable');
+
+function mybiolink_admin_order($query) {
+    if(!is_admin()) return;
+    if($query->get('post_type') == 'biolink' && $query->is_main_query() && !$query->get('orderby')) {
+        $query->set('orderby', 'menu_order');
+        $query->set('order', 'ASC');
+    }
+}
+add_action('pre_get_posts', 'mybiolink_admin_order');
+
+// --- METABOXES ---
 function add_link_meta_boxes() {
     add_meta_box('link_details', 'Configuração do Item', 'render_link_meta_box', 'biolink', 'normal', 'high');
 }
@@ -111,25 +187,34 @@ function render_link_meta_box($post) {
             <option value="raw_html" <?php selected($type, 'raw_html'); ?>>Conteúdo HTML/iFrame/Shortcode</option>
         </select>
 
-        <div style="margin-bottom: 20px; background: #e6f7ff; padding: 10px; border-left: 4px solid #1890ff;">
-            <label>
+        <div style="margin-bottom: 20px; background: #fff0f0; padding: 10px; border-left: 4px solid #ff4444;">
+            <label style="font-size: 14px; font-weight: bold; color: #cc0000;">
                 <input type="checkbox" name="req_login" value="yes" <?php checked($req_login, 'yes'); ?>>
-                <strong>Este item requer identificação (E-mail)?</strong>
+                🔒 Bloquear este item (Requer Login com Senha)
             </label>
-            <p style="margin:5px 0 0; font-size:12px;">Se marcado, o usuário verá um botão "Identifique-se" em vez do conteúdo. Após colocar o e-mail cadastrado, o conteúdo aparecerá.</p>
         </div>
 
         <div id="fields_button" style="display: <?php echo ($type == 'raw_html') ? 'none' : 'block'; ?>;">
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <div style="flex:1"><label>Ícone (FontAwesome):</label><input type="text" name="link_icon" value="<?php echo esc_attr($icon); ?>" style="width:100%"></div>
-                <div><label>Cor:</label><input type="color" name="link_color" value="<?php echo esc_attr($color ? $color : '#000000'); ?>" style="width:50px; height:30px;"></div>
+            <div style="display:flex; gap:10px; margin-bottom:10px; align-items: flex-end;">
+                <div style="flex:1">
+                    <label>Ícone (FontAwesome class):</label>
+                    <input type="text" name="link_icon" value="<?php echo esc_attr($icon); ?>" style="width:100%">
+                </div>
+                <div>
+                    <label>Cor Personalizada:</label><br>
+                    <input type="color" name="link_color" value="<?php echo esc_attr($color ? $color : '#ffffff'); ?>" style="width:60px; height:40px; cursor:pointer;">
+                </div>
             </div>
+            <p style="font-size:12px; color:#666; margin-top:-5px; margin-bottom:15px;">
+                <em>Nota: Se você mudar a paleta de cores geral do site, esta cor será resetada para o padrão.</em>
+            </p>
+            
             <label>Link / URL Imagem:</label><input type="text" name="link_url" value="<?php echo esc_attr($url); ?>" style="width:100%; margin-bottom:10px;">
-            <label>Chave Pix:</label><input type="text" name="pix_key" value="<?php echo esc_attr($pix_key); ?>" style="width:100%">
+            <label>Chave Pix (apenas para tipos Pix):</label><input type="text" name="pix_key" value="<?php echo esc_attr($pix_key); ?>" style="width:100%">
         </div>
 
         <div id="fields_html" style="display: <?php echo ($type == 'raw_html') ? 'block' : 'none'; ?>;">
-            <label><strong>Código (HTML/Shortcode Use-your-Drive):</strong></label><br>
+            <label><strong>Código (HTML/Shortcode):</strong></label><br>
             <textarea name="link_html_content" style="width:100%; height:150px; font-family:monospace;"><?php echo esc_textarea($html_content); ?></textarea>
         </div>
     </div>
@@ -150,22 +235,20 @@ function save_link_meta($post_id) {
     if(isset($_POST['pix_key'])) update_post_meta($post_id, '_pix_key', sanitize_text_field($_POST['pix_key']));
     if(isset($_POST['link_html_content'])) update_post_meta($post_id, '_link_html_content', wp_kses_post($_POST['link_html_content']));
     
-    // Checkbox Salvar
     $req = isset($_POST['req_login']) ? 'yes' : 'no';
     update_post_meta($post_id, '_req_login', $req);
 
     if(isset($_POST['link_color'])) {
         $c = sanitize_text_field($_POST['link_color']);
-        if($c == '#000000') delete_post_meta($post_id, '_link_color'); 
-        else update_post_meta($post_id, '_link_color', $c);
+        update_post_meta($post_id, '_link_color', $c);
     }
 }
 add_action('save_post', 'save_link_meta');
 
-// Opções Bio e vCard (MANTIDAS DO V14...)
+// Opções Bio e vCard
 function mybiolink_options_page() { add_menu_page('Perfil & Bio', 'Perfil & Bio', 'manage_options', 'mybiolink-settings', 'mybiolink_settings_html', 'dashicons-id', 2); }
 add_action('admin_menu', 'mybiolink_options_page');
-function mybiolink_settings_html() { /* ... Código V14 mantido ... */ 
+function mybiolink_settings_html() {
     if (isset($_POST['submit_mybiolink'])) {
         update_option('mybiolink_bio', wp_kses_post($_POST['mybiolink_bio']));
         update_option('vcard_name', sanitize_text_field($_POST['vcard_name']));
@@ -187,6 +270,4 @@ function mybiolink_settings_html() { /* ... Código V14 mantido ... */
     </div>
     <?php
 }
-function mybiolink_vcard() { /* ... Código V14 mantido ... */ }
-add_action('init', 'mybiolink_vcard');
 ?>

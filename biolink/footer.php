@@ -27,12 +27,13 @@
         
         <i class="fa-solid fa-user-lock" style="font-size:40px; color:#111; margin-bottom:15px;"></i>
         <h3>Acesso Restrito</h3>
-        <p style="margin-bottom:20px; font-size:0.9rem; color:#666;">Informe seu e-mail cadastrado para visualizar as pastas privadas.</p>
+        <p style="margin-bottom:20px; font-size:0.9rem; color:#666;">Faça login com sua conta para acessar este conteúdo.</p>
         
-        <input type="email" id="userEmail" class="input-money" placeholder="seu@email.com" style="font-size:1.1rem; font-weight:normal; text-align:left;">
+        <input type="email" id="userEmail" class="input-money" placeholder="E-mail" style="font-size:1rem; font-weight:normal; text-align:left; margin-bottom:10px;">
+        <input type="password" id="userPass" class="input-money" placeholder="Senha" style="font-size:1rem; font-weight:normal; text-align:left;">
         
         <button id="btnLoginAction" class="btn-primary" onclick="processLogin()" style="background:#111; box-shadow:none;">
-            Acessar Arquivos
+            Entrar
         </button>
         
         <div id="loginMsg" style="margin-top:15px; font-size:0.85rem; color:#d32f2f;"></div>
@@ -44,11 +45,23 @@
 <?php wp_footer(); ?>
 
 <script>
-// --- FUNÇÕES DE LAYOUT (BREAKOUT) V14 ---
+// --- FUNÇÕES DE LAYOUT (BREAKOUT) V17 - ADAPTADO PARA GRID ---
 function forceBreakoutLayout() {
     const blocks = document.querySelectorAll('.content-breakout');
     if(blocks.length === 0) return;
     const viewportWidth = window.innerWidth;
+    
+    // Desktop: 100% da largura do grid-column (que é full-width)
+    if(viewportWidth > 768) {
+        blocks.forEach(el => {
+            el.style.width = '100%';
+            el.style.marginLeft = '0';
+            el.style.marginRight = '0';
+            el.style.borderRadius = '20px';
+        });
+        return; 
+    }
+
     const container = document.querySelector('.app-container');
     const style = container ? window.getComputedStyle(container) : null;
     const paddingLeft = style ? parseFloat(style.paddingLeft) : 24;
@@ -56,20 +69,11 @@ function forceBreakoutLayout() {
 
     blocks.forEach(el => {
         el.style.width = ''; el.style.marginLeft = ''; el.style.marginRight = ''; el.style.left = ''; el.style.position = '';
-        if (viewportWidth <= 800) {
+        if (viewportWidth <= 768) {
             el.style.width = `calc(100% + ${paddingLeft + paddingRight}px)`;
             el.style.marginLeft = `-${paddingLeft}px`;
             el.style.marginRight = `-${paddingRight}px`;
             el.style.borderRadius = "0";
-        } else {
-            let targetWidth = viewportWidth * 0.85;
-            if(targetWidth > 1000) targetWidth = 1000;
-            const contentWidth = container.offsetWidth; 
-            const negativeMargin = (targetWidth - contentWidth) / 2;
-            el.style.width = `${targetWidth}px`;
-            el.style.marginLeft = `-${negativeMargin}px`;
-            el.style.marginRight = `-${negativeMargin}px`;
-            el.style.borderRadius = "20px";
         }
     });
 }
@@ -89,23 +93,22 @@ function closeLoginModal() {
 
 function processLogin() {
     const email = document.getElementById('userEmail').value;
+    const pass = document.getElementById('userPass').value;
     const btn = document.getElementById('btnLoginAction');
     const msg = document.getElementById('loginMsg');
 
-    if(!email.includes('@')) {
-        msg.innerText = "Digite um e-mail válido.";
-        return;
-    }
+    if(!email.includes('@')) { msg.innerText = "Digite um e-mail válido."; return; }
+    if(!pass) { msg.innerText = "Digite sua senha."; return; }
 
     btn.innerText = "Verificando...";
     btn.disabled = true;
     msg.innerText = "";
 
-    // Requisição AJAX
     const formData = new FormData();
-    formData.append('action', 'mybiolink_email_login');
+    formData.append('action', 'mybiolink_process_login');
     formData.append('email', email);
-    formData.append('nonce', mybiolink_vars.nonce); // Variável do functions.php
+    formData.append('password', pass);
+    formData.append('nonce', mybiolink_vars.nonce);
 
     fetch(mybiolink_vars.ajax_url, {
         method: 'POST',
@@ -119,31 +122,27 @@ function processLogin() {
             setTimeout(() => location.reload(), 1000);
         } else {
             msg.style.color = "red";
-            msg.innerText = data.data || "Erro ao logar.";
-            btn.innerText = "Acessar Arquivos";
+            msg.innerText = data.data || "Erro de login.";
+            btn.innerText = "Entrar";
             btn.disabled = false;
         }
     })
     .catch(err => {
         msg.innerText = "Erro de conexão.";
-        btn.innerText = "Acessar Arquivos";
+        btn.innerText = "Entrar";
         btn.disabled = false;
     });
 }
 
 function doLogout() {
     if(!confirm("Deseja sair da sua área privada?")) return;
-    
     const formData = new FormData();
     formData.append('action', 'mybiolink_logout');
-    
     fetch(mybiolink_vars.ajax_url, { method: 'POST', body: formData })
     .then(() => location.reload());
 }
 
-// --- FUNÇÕES DE PIX (MANTIDAS DO V14) ---
-// (Cole aqui as funções do Pix: openPixStatic, openPixDynamic, generateDynamicPix, etc.)
-// ... (Código JS do Pix omitido para não estourar limite, é idêntico ao anterior) ...
+// --- FUNÇÕES DE PIX ---
 let currentPixKey = '';
 const modal = document.getElementById('pixModal');
 const viewInput = document.getElementById('view-input');
@@ -203,7 +202,6 @@ function generateDynamicPix() {
 function showPixModal() {
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('visible'), 10);
-    setTimeout(forceBreakoutLayout, 100);
 }
 function closePixModal() {
     modal.classList.remove('visible');
