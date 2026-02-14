@@ -1,8 +1,8 @@
 /*
-Theme Name: MyBioLink V19 (Grid 3 Col Fixed + Color Reset)
-Author: Rodrigo
-Description: Grid Desktop com 3 colunas estritas e reset de cores ao mudar tema.
-Version: 19.0
+Theme Name: One Bio
+Author: INFOR1 - Rodrigo Cruz
+Description: Tema para página Institucional do Condomínio Colina de Piatã - Etapa 2A.
+Version: 1.1
 */
 
 /* --- 1. VARIÁVEIS E TEMAS GLASS --- */
@@ -45,58 +45,16 @@ body {
     transition: max-width 0.4s ease;
 }
 
-/* --- 3. RESPONSIVIDADE & GRID (3 Colunas Fixas) --- */
-@media (min-width: 768px) {
-    :root {
-        --app-max-width: 1100px; /* Garante largura suficiente para 3 colunas */
-    }
-
-    .links-wrapper {
-        display: grid;
-        /* minmax(0, 1fr) evita que conteúdo grande quebre o grid */
-        grid-template-columns: repeat(3, minmax(0, 1fr)); 
-        gap: 24px;
-        width: 100%;
-        justify-content: center;
-    }
-
-    .link-card {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        height: 180px; /* Altura fixa para uniformidade */
-        padding: 20px !important;
-        width: 100%; /* Ocupa 100% da célula do grid */
-    }
-
-    .icon-box {
-        margin-right: 0 !important;
-        margin-bottom: 12px;
-        font-size: 36px !important;
-        width: 60px !important; height: 60px !important;
-    }
-
-    .link-title {
-        flex-grow: 0 !important;
-        font-size: 1.1rem;
-    }
-
-    .link-chevron { display: none; } 
-    .locked-padlock { margin-left: 0 !important; margin-top: 10px; }
-
-    /* Breakout para iframes continua ocupando a linha inteira */
-    .content-breakout {
-        grid-column: 1 / -1; 
-        border-radius: 20px !important;
-        width: 100% !important;
-        margin-left: 0 !important; margin-right: 0 !important;
-    }
-}
-
-/* --- 4. COMPONENTES --- */
+/* --- 3. COMPONENTES (BASE / MOBILE FIRST) --- */
 .profile-header { width: 100%; text-align: center; margin-bottom: 30px; position: relative; z-index: 2; }
+.glass-card {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--blur));
+    border-radius: 24px;
+    padding: 40px 20px;
+}
 .avatar-container { position: relative; width: 110px; height: 110px; margin: 0 auto 16px; }
 .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
 
@@ -109,9 +67,14 @@ body {
 }
 
 .profile-name { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+.profile-name p, .profile-name h1, .profile-name h2, .profile-name h3 { margin: 0; padding: 0; font-size: inherit; font-weight: inherit; }
+
 .profile-bio { font-size: 0.95rem; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5; font-weight: 500; }
+.profile-bio p { margin-bottom: 12px; }
+.profile-bio p:last-child { margin-bottom: 0; }
 .btn-vcard { display: inline-flex; align-items: center; gap: 8px; background: var(--glass-surface); border: 1px solid var(--glass-border); backdrop-filter: blur(var(--blur)); color: var(--text-main); padding: 10px 24px; border-radius: 50px; font-size: 0.9rem; font-weight: 600; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
+/* Grid Mobile Padrão */
 .links-wrapper { width: 100%; display: flex; flex-direction: column; gap: 16px; z-index: 2; }
 
 /* CARTÃO (LINK) */
@@ -135,14 +98,10 @@ body {
 .link-chevron { opacity: 0.6; font-size: 14px; }
 
 /* ESTILOS DE BLOQUEIO */
-.locked-card {
-    opacity: 0.9;
-    border: 1px dashed rgba(100, 100, 100, 0.5) !important;
-    background: rgba(200, 200, 200, 0.2) !important;
-}
+.locked-card { opacity: 0.9; border: 1px dashed rgba(100, 100, 100, 0.5) !important; background: rgba(200, 200, 200, 0.5) !important; }
 .locked-padlock { margin-left: 10px; color: #666; font-size: 14px; }
 
-/* --- 5. OUTROS (Breakout, Modal) --- */
+/* OUTROS */
 .content-breakout { width: 100%; margin: 20px 0; overflow: hidden; z-index: 10; box-shadow: 0 15px 40px rgba(0,0,0,0.15); background: rgba(255,255,255,0.05); position: relative; border-radius: 20px; }
 .content-breakout iframe { width: 100% !important; display: block; border: none; }
 .content-breakout img, .content-breakout video { width: 100% !important; height: auto; display: block; border: none; }
@@ -155,7 +114,6 @@ body {
 #qr-container img { margin: 0 auto !important; display: block !important; max-width: 100% !important; }
 
 .input-money { width: 100%; padding: 16px; font-size: 1.2rem; text-align: center; border: 2px solid #e2e8f0; border-radius: 16px; margin-bottom: 16px; font-weight: 700; color: #0f172a; outline: none; background: #f8fafc; }
-
 .btn-primary { width: 100%; padding: 16px; background: linear-gradient(135deg, #32bcad 0%, #209688 100%); color: white; border: none; border-radius: 16px; font-weight: 700; font-size: 1rem; cursor: pointer; }
 .code-copy-box { width: 100%; background: #f1f5f9; padding: 14px; border-radius: 12px; font-family: monospace; font-size: 0.85rem; color: #334155; word-break: break-all; border: 1px dashed #cbd5e1; margin-bottom: 24px; margin-top: 20px; max-height: 80px; overflow-y: auto; text-align: center; }
 .toast-msg { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); color: #fff; padding: 12px 24px; border-radius: 50px; font-weight: 600; opacity: 0; pointer-events: none; z-index: 10000; transition: opacity 0.3s; }
@@ -164,3 +122,55 @@ body {
 
 .user-welcome { margin-top: 15px; background: var(--glass-surface); border: 1px solid var(--glass-border); padding: 8px 16px; border-radius: 50px; display: inline-flex; align-items: center; gap: 15px; font-size: 0.9rem; color: var(--text-main); }
 .btn-logout { background: transparent; border: none; color: #ef4444; font-weight: 600; cursor: pointer; font-size: 0.85rem; padding: 0; }
+
+/* --- 4. RESPONSIVIDADE & GRID (Telas Grandes >= 1366px) --- */
+/* Esta seção deve vir DEPOIS para sobrescrever o .links-wrapper mobile */
+@media (min-width: 1366px) {
+    :root {
+        --app-max-width: 850px; /* Mantém os botões num tamanho responsivo agradável */
+    }
+
+    .links-wrapper {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr)); 
+        gap: 24px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .link-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        aspect-ratio: 1 / 1; /* Força os cards a serem quadrados */
+        height: auto; 
+        padding: 24px !important;
+        width: 100%; 
+    }
+
+    .icon-box {
+        margin-right: 0 !important;
+        margin-bottom: 16px;
+        font-size: 42px !important; /* Ícone ajustado para proporção quadrada */
+        width: auto !important; height: auto !important;
+    }
+
+    .link-title {
+        flex-grow: 0 !important;
+        font-size: 1.1rem;
+        margin-top: 8px;
+    }
+
+    .link-chevron { display: none; } 
+    .locked-padlock { margin-left: 0 !important; margin-top: 10px; display: block; }
+
+    /* Breakout para iframes continua ocupando a linha inteira */
+    .content-breakout {
+        grid-column: 1 / -1; 
+        border-radius: 20px !important;
+        width: 100% !important;
+        margin-left: 0 !important; margin-right: 0 !important;
+    }
+}

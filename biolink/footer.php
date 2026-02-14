@@ -45,14 +45,12 @@
 <?php wp_footer(); ?>
 
 <script>
-// --- FUNÇÕES DE LAYOUT (BREAKOUT) V17 - ADAPTADO PARA GRID ---
 function forceBreakoutLayout() {
     const blocks = document.querySelectorAll('.content-breakout');
     if(blocks.length === 0) return;
     const viewportWidth = window.innerWidth;
     
-    // Desktop: 100% da largura do grid-column (que é full-width)
-    if(viewportWidth > 768) {
+    if(viewportWidth > 1366) {
         blocks.forEach(el => {
             el.style.width = '100%';
             el.style.marginLeft = '0';
@@ -69,7 +67,7 @@ function forceBreakoutLayout() {
 
     blocks.forEach(el => {
         el.style.width = ''; el.style.marginLeft = ''; el.style.marginRight = ''; el.style.left = ''; el.style.position = '';
-        if (viewportWidth <= 768) {
+        if (viewportWidth <= 1366) {
             el.style.width = `calc(100% + ${paddingLeft + paddingRight}px)`;
             el.style.marginLeft = `-${paddingLeft}px`;
             el.style.marginRight = `-${paddingRight}px`;

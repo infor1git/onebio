@@ -1,6 +1,6 @@
 <?php get_header(); ?>
 
-<header class="profile-header">
+<header class="profile-header glass-card">
     <div class="avatar-container">
         <?php 
         $logo = get_theme_mod('custom_logo');
@@ -10,8 +10,20 @@
         <div class="btn-share" onclick="shareProfile()"><i class="fa-solid fa-share-nodes"></i></div>
     </div>
     
-    <h1 class="profile-name"><?php bloginfo('name'); ?></h1>
-    <div class="profile-bio"><?php echo wp_kses_post(get_option('mybiolink_bio')); ?></div>
+    <div class="profile-name">
+        <?php 
+        $my_title = get_option('mybiolink_title');
+        // Se estiver vazio, cai para o padrão do bloginfo
+        echo $my_title ? apply_filters('the_content', $my_title) : '<h1>' . get_bloginfo('name') . '</h1>';
+        ?>
+    </div>
+    
+    <div class="profile-bio">
+        <?php 
+        // apply_filters('the_content') processa as tags HTML nativas do editor, gera parágrafos (<p>) e quebras (<br>)
+        echo apply_filters('the_content', get_option('mybiolink_bio')); 
+        ?>
+    </div>
     
     <?php if(get_option('vcard_name')): ?>
         <a href="?action=download_vcard" class="btn-vcard"><i class="fa-regular fa-address-card"></i> Salvar Contato</a>
@@ -37,32 +49,26 @@
         $req_login = $meta['_req_login'][0] ?? 'no';
         $is_locked = ($req_login === 'yes' && !is_user_logged_in());
         
-        // --- 1. SE BLOQUEADO (LOCKED) ---
         if ($is_locked) {
             ?>
             <div class="link-card locked-card" onclick="openLoginModal()" style="--card-rgb: 200, 200, 200;">
-                <div class="icon-box">
-                    <i class="fa-solid fa-lock" style="color: #666;"></i>
-                </div>
+                <div class="icon-box"><i class="fa-solid fa-lock" style="color: #666;"></i></div>
                 <span class="link-title"><?php the_title(); ?> <i class="fa-solid fa-lock locked-padlock"></i></span>
                 <i class="fa-solid fa-chevron-right link-chevron"></i>
             </div>
             <?php
-            continue; // Pula para o próximo item do loop, não renderiza o conteúdo real
+            continue; 
         }
 
-        // --- 2. CONTEÚDO HTML/IFRAME ---
         if ($type === 'raw_html') {
             $content = $meta['_link_html_content'][0] ?? '';
             echo '<div class="content-breakout">' . do_shortcode($content) . '</div>';
         
-        // --- 3. BOTÕES E LINKS ---
         } else {
             $url = $meta['_link_url'][0] ?? '#';
             $icon = $meta['_link_icon'][0] ?? 'fa-solid fa-link';
             $saved_color = $meta['_link_color'][0] ?? ''; 
             
-            // Se tiver cor salva, aplica. Se não, usa o padrão do tema (glassmorphism)
             $style_attr = "";
             if($saved_color) {
                 $rgb = mybiolink_hex2rgb($saved_color); 
@@ -84,11 +90,8 @@
                 $onclick = "openPixDynamic('".esc_js($pixKey)."')";
             }
             ?>
-            
             <a href="<?php echo $href; ?>" class="link-card" target="<?php echo $target; ?>" onclick="<?php echo $onclick; ?>" <?php echo $style_attr; ?>>
-                <div class="icon-box">
-                    <i class="<?php echo esc_attr($icon); ?>"></i>
-                </div>
+                <div class="icon-box"><i class="<?php echo esc_attr($icon); ?>"></i></div>
                 <span class="link-title"><?php the_title(); ?></span>
                 <?php if($type == 'url'): ?><i class="fa-solid fa-chevron-right link-chevron"></i><?php endif; ?>
             </a>
